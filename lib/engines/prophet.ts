@@ -192,90 +192,172 @@ export async function predict(input: ProphetPredictInput): Promise<ProphetPredic
   const targetDesc = input.target ?? input.category ?? input.role_distribution ?? 'the product';
   const personaContext = input.persona_template ?? buildPersonaContext(input);
 
-  const prompt = `You are Prophet Engine — a virtual market simulation engine for cross-border e-commerce.
-Your job: simulate ${n} REAL-FEELING buyer personas evaluating a product, then produce a structured market insight report.
+  const prompt = `You are Prophet Engine — the virtual market simulation core of ProphetOS, a cross-border e-commerce intelligence platform.
 
-## Product Under Evaluation
+MISSION: Simulate ${n} hyper-realistic buyer personas evaluating the product below, then synthesize a market insight report that a seller could act on TODAY.
+
+═══════════════════════════════════════════
+PRODUCT UNDER EVALUATION
+═══════════════════════════════════════════
 ${targetDesc}
 
-## Persona Market Recipe
+═══════════════════════════════════════════
+PERSONA MARKET RECIPE
+═══════════════════════════════════════════
 ${personaContext}
 
-## Output Format — STRICT JSON, no markdown
-
-Output ONE JSON object with this exact structure:
+═══════════════════════════════════════════
+OUTPUT — pure JSON, no markdown, no preamble
+═══════════════════════════════════════════
 
 {
   "personas": [
     {
       "id": 1,
-      "name": "Sarah M.",
-      "demographics": { "country": "DE", "region": "Bavaria", "age": 32, "gender": "F", "income_band": "middle", "occupation": "teacher" },
-      "psychographics": { "lifestyle": "outdoor_enthusiast", "values": ["quality", "sustainability"], "tech_savviness": "medium" },
-      "shopping_behavior": { "primary_channels": ["amazon.de", "decathlon"], "price_sensitivity": "medium", "research_depth": "high", "impulse_threshold_usd": 60 },
-      "cultural_anchors": ["Decathlon regular", "Stiftung Warentest reader", "owns Thermos flask"],
-      "scores": { "awareness": 7, "interest": 8, "desire": 7, "purchase_intent": 5, "advocacy": 4 },
+      "name": "Lena K.",
+      "demographics": {
+        "country": "DE", "region": "Baden-Württemberg",
+        "age": 34, "gender": "F",
+        "income_band": "upper_middle",
+        "occupation": "Projektmanagerin"
+      },
+      "psychographics": {
+        "lifestyle": "Wochenend-Wanderin, minimalistisch, zero-waste-orientiert",
+        "values": ["Qualität vor Quantität", "Nachhaltigkeit", "Funktionalität"],
+        "tech_savviness": "medium-high"
+      },
+      "shopping_behavior": {
+        "primary_channels": ["amazon.de", "Globetrotter", "Decathlon"],
+        "price_sensitivity": "medium",
+        "research_depth": "very high — liest mindestens 50 Bewertungen",
+        "impulse_threshold_usd": 55
+      },
+      "cultural_anchors": [
+        "Globetrotter-Stammkundin seit 2019",
+        "Stiftung Warentest abonniert",
+        "besitzt Stanley Thermobecher",
+        "Mitglied im DAV (Deutscher Alpenverein)",
+        "schaut GearLab-Videos auf YouTube"
+      ],
+      "scores": {
+        "awareness": 8, "interest": 9, "desire": 8,
+        "purchase_intent": 6, "advocacy": 5
+      },
       "decision_journey": {
-        "trigger": "saw it recommended in a camping Facebook group",
-        "research_path": ["amazon reviews", "youtube demo"],
-        "deal_breakers": ["no CE mark", "plastic build", "above €80"],
-        "deal_makers": ["stainless steel", "compact size", "German manual included"],
-        "willingness_to_pay_usd": 65
+        "trigger": "Freundin hat dasselbe Produkt beim Bergsteigen benutzt — sah beeindruckend aus",
+        "research_path": ["Amazon Bewertungen (min. 4★)", "YouTube Praxistest", "Stiftung Warentest Archiv", "DAV-Forum"],
+        "deal_breakers": ["kein CE-Zeichen", "Plastikteile die Kaffeegeschmack beeinflussen", "Preis über 85€"],
+        "deal_makers": ["Edelstahl-Innenraum", "passt in 1L-Rucksackfach", "USB-C Ladeanschluss", "deutschsprachige Anleitung"],
+        "willingness_to_pay_usd": 72
       },
       "voice": {
-        "first_reaction": "Sieht praktisch aus, aber mal schauen ob es wirklich funktioniert.",
-        "concerns": ["Hält die Wärme wirklich lange?", "Gibt es ein CE-Zeichen?"],
-        "hot_buttons": ["Edelstahl ist gut — kein Plastikgeschmack", "Passt in meinen Rucksack"],
-        "would_buy_if": "Wenn es Stiftung Warentest-ähnliche Bewertungen gibt",
-        "would_not_buy_if": "Kein deutsches Handbuch oder kein CE-Zeichen"
+        "first_reaction": "Oh, das sieht tatsächlich praktisch aus. Aber ob das wirklich auf 2.000m Höhe funktioniert?",
+        "concerns": [
+          "Schmeckt der Kaffee wirklich gut? Ich bin da sehr empfindlich.",
+          "Wie lange hält der Akku bei Kälte — Lithium verliert ja schnell Kapazität?"
+        ],
+        "hot_buttons": [
+          "Kein Plastik, der in den Kaffee ausgast — das ist für mich ein Kaufargument.",
+          "Passt in meine Osprey-Tasche? Wenn ja, nehme ich ihn beim nächsten Alpenüberquerung mit."
+        ],
+        "would_buy_if": "Wenn es einen echten Praxistest von einem Bergsteiger gibt — keine Instagram-Influencer.",
+        "would_not_buy_if": "Kein CE-Zeichen oder Bewertungen unter 4,2 Sterne mit mehr als 200 Rezensionen."
       }
     }
-    // ... repeat for all ${n} personas
   ],
   "market_insights": {
     "burst_score": {
-      "overall": 72,
-      "aida": { "awareness": 75, "interest": 78, "desire": 68, "purchase_intent": 62, "advocacy": 55 },
-      "score": 7.1,
+      "overall": 74,
+      "aida": {
+        "awareness": 81, "interest": 83, "desire": 74,
+        "purchase_intent": 65, "advocacy": 58
+      },
+      "score": 7.3,
       "confidence": "medium-high",
-      "rationale": "Strong awareness and interest but purchase intent drops — classic price-sensitive outdoor category"
+      "rationale": "Starke Awareness und Interest durch klare Produktkategorie — Desire-to-Purchase Drop von 9 Punkten zeigt typisches Preissensitivitätsmuster im deutschen Outdoor-Markt. CE-Zertifizierung ist kritischer Vertrauensfaktor."
     },
     "segments": [
-      { "name": "🏕️ Weekend Campers", "size_pct": 35, "intent": 7.8, "description": "Quality-first, willing to pay for durability", "key_quote": "If it survives a hiking trip, I'm sold." },
-      { "name": "☕ Urban Coffee Lovers", "size_pct": 25, "intent": 6.2, "description": "Skeptical about outdoor brew quality", "key_quote": "Can it really make decent espresso outside?" },
-      { "name": "🎁 Gift Buyers", "size_pct": 20, "intent": 7.0, "description": "Packaging and giftability matter most", "key_quote": "Makes a perfect birthday gift for outdoor friends." }
+      {
+        "name": "🏔️ DAV-Mitglieder & Alpinisten",
+        "size_pct": 28,
+        "intent": 8.4,
+        "description": "Hohe Zahlungsbereitschaft, priorisieren Qualität und Praxistauglichkeit über Preis. Hauptentscheidungsquelle: Community-Empfehlungen und echte Bergsteiger-Tests.",
+        "key_quote": "Wenn es auf der Zugspitze funktioniert, kaufe ich es sofort."
+      },
+      {
+        "name": "☕ Kaffeequalitätsbewusste",
+        "size_pct": 22,
+        "intent": 6.1,
+        "description": "Zweifeln an Brühqualität in der Natur. Schwer zu überzeugen ohne Blindtest-Bewertung von anerkanntem Kaffeeexperten.",
+        "key_quote": "Espresso outdoor? Das glaube ich erst wenn ich ihn getrunken habe."
+      },
+      {
+        "name": "🎒 Wochenend-Wanderer",
+        "size_pct": 31,
+        "intent": 7.6,
+        "description": "Preissensitiver, aber bereit für Qualität zu zahlen wenn Nutzen klar ist. Entscheidet nach Amazon-Bewertungen und YouTube-Videos.",
+        "key_quote": "Für 70€ nehme ich das Risiko — wenn es schlecht ist, geht es zurück."
+      },
+      {
+        "name": "🎁 Geschenkekäufer",
+        "size_pct": 19,
+        "intent": 7.2,
+        "description": "Kaufentscheidung auf Basis von Verpackungsqualität und Geschenkbarkeit. Preis weniger relevant als Präsentation.",
+        "key_quote": "Das ist das perfekte Weihnachtsgeschenk für meinen Outdoor-verrückten Bruder."
+      }
     ],
     "top_drivers": [
-      { "factor": "stainless steel / no plastic taste", "weight": 0.34, "evidence": "mentioned by 11 of 15 personas" },
-      { "factor": "compact & packable design", "weight": 0.28, "evidence": "top desire trigger for camping segment" },
-      { "factor": "USB-C charging", "weight": 0.18, "evidence": "deal-maker for tech-savvy segment" }
+      { "factor": "Edelstahl-Innenraum ohne Plastikgeschmack", "weight": 0.38, "evidence": "${n} von ${n} Personas nannten Materialqualität als Primärkriterium" },
+      { "factor": "Kompakte Größe (Rucksack-kompatibel)", "weight": 0.31, "evidence": "Ausschlaggebend für Alpin- und Wanderer-Segment" },
+      { "factor": "USB-C Schnellladung", "weight": 0.21, "evidence": "Deal-Maker für tech-affines Segment, besonders 25-35 Jahre" },
+      { "factor": "Deutschsprachige Bedienungsanleitung", "weight": 0.14, "evidence": "Vertrauenssignal für deutschen Markt — fehlt bei vielen Konkurrenten" }
     ],
     "top_blockers": [
-      { "factor": "price above €80", "weight": 0.42, "evidence": "21 personas set €80 as ceiling" },
-      { "factor": "no CE/GS certification", "weight": 0.31, "evidence": "mandatory for German market trust" },
-      { "factor": "brew quality doubt", "weight": 0.22, "evidence": "coffee snob segment unconvinced" }
+      { "factor": "Preis über 85€", "weight": 0.44, "evidence": "Psychologische Kaufschwelle für Massenmarkt-Segment" },
+      { "factor": "Fehlendes CE-Zeichen / GS-Prüfzeichen", "weight": 0.36, "evidence": "Absoluter Dealbreaker für informierten deutschen Käufer" },
+      { "factor": "Brühqualitätszweifel (kein Blindtest)", "weight": 0.26, "evidence": "Coffee-Snob-Segment (22%) bleibt skeptisch ohne externe Validierung" },
+      { "factor": "Unbekannte Marke ohne Bewertungshistorie", "weight": 0.19, "evidence": "Deutsche Käufer vertrauen Marken mit 200+ Amazon-Bewertungen" }
     ],
     "actionable_insights": [
-      "🎯 Lead with 'tested by real backpackers' — not influencer content",
-      "🎯 Price anchor €65-79 — €80 is the psychological ceiling for DE market",
-      "💡 Highlight stainless steel + CE mark + German manual in first bullet",
-      "⚠️ Must obtain CE certification before DE listing — 31% deal-breaker",
-      "🎁 Create gift-ready packaging — 20% of buyers are gift shoppers"
+      "🎯 Headline-Botschaft: 'Von echten Bergsteigern getestet' — kein Influencer-Content, keine Stock-Fotos",
+      "💰 Preisanker: €69-79 ist das Sweet Spot — €80 ist die psychologische Todeszone für DE-Markt",
+      "🏅 CE-Zertifizierung vor Launch beschaffen — 36% Deal-Breaker-Rate ist inakzeptabel",
+      "📝 Bullet 1 muss enthalten: Edelstahl + CE-Zeichen + Deutsche Anleitung (drei Vertrauensanker)",
+      "🎁 Gift-Variante mit Premiumverpackung entwickeln — 19% der Käufer sind Geschenke-Segment",
+      "⭐ Amazon-Bewertungsaufbau priorisieren — deutsche Käufer warten auf 200+ Rezensionen"
     ]
   }
 }
 
-## CRITICAL RULES — read before generating:
+═══════════════════════════════════════════
+EXECUTION RULES — non-negotiable
+═══════════════════════════════════════════
 
-1. **Voice must sound like a REAL person texting**, not a survey. BAD: "I value sustainability and quality." GOOD: "I'd rather buy one €70 thing that lasts than three €20 things that break."
-2. **Cultural anchors must be SPECIFIC**: BAD: "shops online frequently" GOOD: "Decathlon regular, Stiftung Warentest reader, owns a Thermos flask"
-3. **Scores must be internally consistent**: if a persona's deal-breaker is "above €80" and product costs €90, their purchase_intent must be ≤ 3.
-4. **No two personas use the same phrasing in voice fields** — vary tone, vocabulary, language (German personas can have German voice quotes).
-5. **Distribution must roughly follow the market recipe** — do not over-represent any demographic.
-6. **aida scores** are averages across all ${n} personas (1 decimal).
-7. Output ONLY the JSON object — no markdown fences, no explanation, no preamble.
+AUTHENTICITY (most important):
+• Voice must sound like WhatsApp message to a friend, NOT a marketing survey
+  ✗ BAD: "Ich schätze Qualität und Nachhaltigkeit sehr."
+  ✓ GOOD: "Lieber einmal 75€ ausgeben als dreimal 25€ für Schrott."
+• Cultural anchors: hyper-specific real brands/communities
+  ✗ BAD: "kauft gerne online"
+  ✓ GOOD: "Globetrotter-Stammkunde, DAV-Mitglied, hat Stanley-Thermos"
+• Mix German and English in voice quotes naturally (how bilingual shoppers actually think)
 
-Generate ${n} personas + market_insights now.`;
+CONSISTENCY (enforced):
+• If deal_breaker = "above €80" and product = €85 → purchase_intent ≤ 3, PERIOD
+• If persona values "eco" → they check material + packaging before price
+• Skeptical personas (score ≤ 5) must have specific, credible objections
+
+DISTRIBUTION:
+• Follow market recipe demographics roughly
+• ~20% score 1-5 (skeptics), ~45% score 5-7 (interested), ~35% score 7-10 (enthusiasts)
+• Vary age 22-65, gender balanced, regions across DE/AT/CH
+
+AGGREGATION:
+• aida scores = precise averages across all ${n} personas (1 decimal)
+• evidence strings cite specific numbers: "X von ${n} Personas..."
+• actionable_insights are executable TODAY — no vague advice
+
+OUTPUT: Pure JSON only. No markdown. No explanation. Start with { and end with }.`;
 
   const response = await client.messages.create({
     model: MODEL,

@@ -287,7 +287,8 @@ export default function PlanTimeline({ steps, stepStatus, stepOutputs = {}, goal
         {steps.map((step) => {
           const status = stepStatus[step.id] ?? 'pending';
           const rawOutput = stepOutputs[step.id];
-          const summary = status === 'done' ? getStepSummary(step.name, rawOutput) : null;
+          // Show summary whenever output is available (not just 'done')
+          const summary = rawOutput ? getStepSummary(step.name, rawOutput) : null;
           const layer = layerMap.get(step.id) ?? 0;
           const isParallel = (layerSize.get(layer) ?? 1) > 1;
 

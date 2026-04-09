@@ -5,6 +5,7 @@ import IntentInput from '@/components/IntentInput';
 import PlanTimeline from '@/components/PlanTimeline';
 import type { StepStatus } from '@/components/PlanTimeline';
 import FinalReport from '@/components/FinalReport';
+import SkillsPanel from '@/components/SkillsPanel';
 import type { Plan } from '@/lib/planner/parse';
 
 type AppState = 'idle' | 'planning' | 'executing' | 'done' | 'error';
@@ -241,6 +242,9 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* ── Skills Panel (idle only) ── */}
+        {appState === 'idle' && <SkillsPanel />}
 
         {/* ── Intent Input ── */}
         <IntentInput
