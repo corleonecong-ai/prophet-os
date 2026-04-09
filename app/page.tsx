@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import IntentInput from '@/components/IntentInput';
+import IntentConsole from '@/components/IntentConsole';
 import PlanTimeline from '@/components/PlanTimeline';
 import type { StepStatus } from '@/components/PlanTimeline';
 import FinalReport from '@/components/FinalReport';
+import ArtifactTabs from '@/components/ArtifactTabs';
 import SkillsPanel from '@/components/SkillsPanel';
 import type { Plan } from '@/lib/planner/parse';
 
@@ -246,8 +247,8 @@ export default function Home() {
         {/* ── Skills Panel (idle only) ── */}
         {appState === 'idle' && <SkillsPanel />}
 
-        {/* ── Intent Input ── */}
-        <IntentInput
+        {/* ── Intent Console ── */}
+        <IntentConsole
           value={intent}
           onChange={setIntent}
           onSubmit={handleRun}
@@ -288,6 +289,11 @@ export default function Home() {
               </div>
             )}
           </div>
+        )}
+
+        {/* ── Artifact Tabs ── */}
+        {appState === 'done' && Object.keys(stepOutputs).length > 0 && (
+          <ArtifactTabs stepOutputs={stepOutputs} />
         )}
 
         {/* ── Final Report ── */}

@@ -1,6 +1,7 @@
 'use client';
 
 import type { PlanStep } from '@/lib/planner/parse';
+import StepRow from '@/components/StepRow';
 
 export type StepStatus = 'pending' | 'running' | 'done' | 'failed' | 'skipped';
 
@@ -287,72 +288,19 @@ export default function PlanTimeline({ steps, stepStatus, stepOutputs = {}, goal
         {steps.map((step) => {
           const status = stepStatus[step.id] ?? 'pending';
           const rawOutput = stepOutputs[step.id];
-          // Show summary whenever output is available (not just 'done')
           const summary = rawOutput ? getStepSummary(step.name, rawOutput) : null;
           const layer = layerMap.get(step.id) ?? 0;
           const isParallel = (layerSize.get(layer) ?? 1) > 1;
 
           return (
-            <div
+            <StepRow
               key={step.id}
-              className={`border rounded-lg p-3 transition-all duration-300 ${statusColor[status]}`}
-            >
-              <div className="flex items-start gap-3">
-                <span className={`font-mono text-base leading-none mt-0.5 w-5 shrink-0 text-center ${statusIconColor[status]}`}>
-                  {statusIcon[status]}
-                </span>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-xs bg-zinc-800/80 px-1.5 py-0.5 rounded text-zinc-400">
-                      {step.id}
-                    </span>
-                    <span className="font-mono text-sm font-semibold">{step.name}</span>
-                    <span className="text-xs text-zinc-600 bg-zinc-900 px-1.5 py-0.5 rounded">
-                      {step.type === 'engine' ? '引擎' : '技能'}
-                    </span>
-                    {isParallel && (
-                      <span className="text-xs text-blue-400 bg-blue-950/50 px-1.5 py-0.5 rounded font-mono">
-                        ⚡ 并行
-                      </span>
-                    )}
-                    {step.condition && (
-                      <span className="text-xs text-violet-400 bg-violet-950/50 px-1.5 py-0.5 rounded font-mono" title={step.condition}>
-                        条件执行
-                      </span>
-                    )}
-                    {step.depends_on.length > 0 && (
-                      <span className="text-xs text-zinc-600 font-mono">
-                        ↳ {step.depends_on.join(', ')}
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-xs text-zinc-600 mt-1">{step.why}</p>
-
-                  {summary && (
-                    <div className="mt-2 pt-2 border-t border-zinc-800/50">
-                      {summary}
-                    </div>
-                  )}
-
-                  {status === 'running' && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="flex gap-0.5">
-                        {[0, 1, 2].map(i => (
-                          <div
-                            key={i}
-                            className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-bounce"
-                            style={{ animationDelay: `${i * 0.15}s` }}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-xs text-yellow-400/70">执行中…</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+              step={step}
+              status={status}
+              output={rawOutput}
+              isParallel={isParallel}
+              summary={summary}
+            />
           );
         })}
       </div>
