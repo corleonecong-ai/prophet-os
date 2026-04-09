@@ -186,7 +186,7 @@ export default function Home() {
         )}
 
         {/* DAG Timeline */}
-        {plan && <PlanTimeline steps={plan.steps} stepStatus={stepStatus} />}
+        {plan && <PlanTimeline steps={plan.steps} stepStatus={stepStatus} stepOutputs={stepOutputs} />}
 
         {/* Execution Log */}
         {log.length > 0 && (
