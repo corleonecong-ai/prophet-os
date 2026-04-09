@@ -1,7 +1,37 @@
 'use client';
 
+import { useState, useCallback } from 'react';
+
 interface FinalReportProps {
   stepOutputs: Record<string, unknown>;
+}
+
+// ── Copy button ───────────────────────────────────────────────────────────────
+
+function CopyButton({ text, label = '复制' }: { text: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback: select the text
+    }
+  }, [text]);
+
+  return (
+    <button
+      onClick={handleCopy}
+      className={`text-[10px] font-mono px-2 py-0.5 rounded transition-colors shrink-0 ${
+        copied
+          ? 'bg-emerald-900/60 text-emerald-400'
+          : 'bg-zinc-800 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700'
+      }`}
+    >
+      {copied ? '✓ 已复制' : label}
+    </button>
+  );
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -510,7 +540,10 @@ export default function FinalReport({ stepOutputs }: FinalReportProps) {
           {/* Title */}
           {d.listingTitle && (
             <div className="mb-4">
-              <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-wider mb-1.5">产品标题 · Title</p>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-wider">产品标题 · Title</p>
+                <CopyButton text={d.listingTitle} />
+              </div>
               <p className="text-sm font-semibold text-zinc-100 leading-relaxed bg-zinc-900 rounded-lg p-3 border border-zinc-800">
                 {d.listingTitle}
               </p>
@@ -520,7 +553,10 @@ export default function FinalReport({ stepOutputs }: FinalReportProps) {
           {/* Bullets */}
           {d.listingBullets.length > 0 && (
             <div className="mb-4">
-              <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-wider mb-1.5">卖点 Bullets ({d.listingBullets.length}条)</p>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-wider">卖点 Bullets ({d.listingBullets.length}条)</p>
+                <CopyButton text={d.listingBullets.map((b, i) => `• ${b}`).join('\n')} />
+              </div>
               <ul className="space-y-2">
                 {d.listingBullets.map((b, i) => (
                   <li key={i} className="flex gap-2.5 text-sm text-zinc-300 bg-zinc-900 rounded-lg p-2.5 border border-zinc-800">
@@ -535,7 +571,10 @@ export default function FinalReport({ stepOutputs }: FinalReportProps) {
           {/* Description */}
           {d.listingDescription && (
             <div className="mb-4">
-              <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-wider mb-1.5">产品描述 · Description</p>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-wider">产品描述 · Description</p>
+                <CopyButton text={d.listingDescription} />
+              </div>
               <p className="text-xs text-zinc-400 leading-relaxed bg-zinc-900 rounded-lg p-3 border border-zinc-800">
                 {d.listingDescription}
               </p>
@@ -545,9 +584,12 @@ export default function FinalReport({ stepOutputs }: FinalReportProps) {
           {/* Keywords */}
           {d.listingKeywords.length > 0 && (
             <div>
-              <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-wider mb-1.5">
-                后台关键词 · Backend Keywords ({d.listingKeywords.length}个)
-              </p>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-wider">
+                  后台关键词 · Backend Keywords ({d.listingKeywords.length}个)
+                </p>
+                <CopyButton text={d.listingKeywords.join(', ')} />
+              </div>
               <div className="flex flex-wrap gap-1.5">
                 {d.listingKeywords.slice(0, 30).map((kw, i) => (
                   <span key={i} className="text-[10px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-400 px-2 py-0.5 rounded">
@@ -558,6 +600,38 @@ export default function FinalReport({ stepOutputs }: FinalReportProps) {
                   <span className="text-[10px] font-mono text-zinc-600 px-2 py-0.5">+{d.listingKeywords.length - 30} more</span>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Download button */}
+          {(d.listingTitle || d.listingBullets.length > 0) && (
+            <div className="mt-5 pt-4 border-t border-violet-800/30">
+              <button
+                onClick={() => {
+                  const lines: string[] = ['=== ProphetOS 上架材料包 ===', ''];
+                  if (d.listingTitle) lines.push('【标题】', d.listingTitle, '');
+                  if (d.listingBullets.length > 0) {
+                    lines.push('【卖点 Bullets】');
+                    d.listingBullets.forEach((b, i) => lines.push(`${i + 1}. ${b}`));
+                    lines.push('');
+                  }
+                  if (d.listingDescription) lines.push('【产品描述】', d.listingDescription, '');
+                  if (d.listingKeywords.length > 0) lines.push('【后台关键词】', d.listingKeywords.join(', '), '');
+                  if (d.certifications.length > 0) lines.push('【合规认证】', d.certifications.join(', '), '');
+                  if (d.burstProb !== null) lines.push(`【爆款概率】${Math.round(d.burstProb * 100)}% (${d.personas.length} personas)`);
+                  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = 'prophet-os-listing-package.txt';
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="w-full py-2.5 bg-violet-700 hover:bg-violet-600 text-white text-sm font-mono rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <span>📦</span>
+                <span>下载完整材料包</span>
+              </button>
             </div>
           )}
         </div>
@@ -616,9 +690,14 @@ export default function FinalReport({ stepOutputs }: FinalReportProps) {
           </div>
         )}
 
-        <p className="text-[10px] text-zinc-700 mt-3 font-mono">
-          Powered by ProphetOS · Prophet × Atlas × Claw · Zhipu GLM-4 compatible API
-        </p>
+        <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-between">
+          <p className="text-[10px] text-zinc-700 font-mono">
+            Powered by ProphetOS · Prophet × Atlas × Claw
+          </p>
+          <span className="text-[10px] font-mono text-emerald-600 bg-emerald-950/40 px-2 py-1 rounded-full">
+            🤖 全程无人工干预
+          </span>
+        </div>
       </div>
     </div>
   );

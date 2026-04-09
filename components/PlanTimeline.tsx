@@ -8,6 +8,8 @@ interface PlanTimelineProps {
   steps: PlanStep[];
   stepStatus: Record<string, StepStatus>;
   stepOutputs?: Record<string, unknown>;
+  goal?: string;
+  reasoning?: string;
 }
 
 const statusIcon: Record<StepStatus, string> = {
@@ -34,12 +36,51 @@ const statusIconColor: Record<StepStatus, string> = {
   skipped: 'text-zinc-600',
 };
 
-// Extract a human-readable summary from step output
+// ── Compute which DAG layer each step belongs to ─────────────────────────────
+
+function computeLayerMap(steps: PlanStep[]): Map<string, number> {
+  const layerMap = new Map<string, number>();
+  const inDegree = new Map<string, number>();
+  const graph = new Map<string, string[]>();
+
+  for (const s of steps) {
+    inDegree.set(s.id, 0);
+    graph.set(s.id, []);
+  }
+  for (const s of steps) {
+    for (const dep of s.depends_on) {
+      graph.get(dep)?.push(s.id);
+      inDegree.set(s.id, (inDegree.get(s.id) ?? 0) + 1);
+    }
+  }
+
+  let layer = 0;
+  let queue = steps.filter(s => inDegree.get(s.id) === 0);
+  while (queue.length > 0) {
+    for (const node of queue) layerMap.set(node.id, layer);
+    const next: PlanStep[] = [];
+    for (const node of queue) {
+      for (const nb of graph.get(node.id) ?? []) {
+        const deg = (inDegree.get(nb) ?? 1) - 1;
+        inDegree.set(nb, deg);
+        if (deg === 0) {
+          const s = steps.find(x => x.id === nb);
+          if (s) next.push(s);
+        }
+      }
+    }
+    queue = next;
+    layer++;
+  }
+  return layerMap;
+}
+
+// ── Extract inline summary from step output ──────────────────────────────────
+
 function getStepSummary(stepName: string, rawOutput: unknown): React.ReactNode | null {
   if (!rawOutput || typeof rawOutput !== 'object') return null;
   const out = rawOutput as Record<string, unknown>;
 
-  // Unwrap {output: ...} wrapper
   const data = ('output' in out && out.output && typeof out.output === 'object')
     ? out.output as Record<string, unknown>
     : out;
@@ -122,13 +163,13 @@ function getStepSummary(stepName: string, rawOutput: unknown): React.ReactNode |
         )}
         {answer && <p className="text-zinc-400 leading-relaxed">{answer.slice(0, 200)}{answer.length > 200 ? '…' : ''}</p>}
         {steps.length > 0 && (
-          <p className="text-zinc-600">{steps.length} 步推理链 · {steps[0]?.slice(0, 80)}…</p>
+          <p className="text-zinc-600">{steps.length} 步推理链 · {String(steps[0]).slice(0, 80)}…</p>
         )}
       </div>
     );
   }
 
-  // llm.generate (listing)
+  // llm.generate
   if (stepName.includes('generate')) {
     const title = typeof d.title === 'string' ? d.title : null;
     const bullets = Array.isArray(d.bullets) ? d.bullets as string[] : [];
@@ -138,7 +179,6 @@ function getStepSummary(stepName: string, rawOutput: unknown): React.ReactNode |
     const verdict = typeof d.verdict === 'string' ? d.verdict : null;
 
     if (burstProb !== null || verdict) {
-      // Final report step
       return (
         <div className="mt-2 text-xs space-y-1">
           {verdict && <p className="text-zinc-400">{verdict.slice(0, 150)}{verdict.length > 150 ? '…' : ''}</p>}
@@ -157,7 +197,7 @@ function getStepSummary(stepName: string, rawOutput: unknown): React.ReactNode |
     );
   }
 
-  // llm.expand (keywords)
+  // llm.expand
   if (stepName.includes('expand')) {
     const items = Array.isArray(d.items) ? d.items as string[] : [];
     return (
@@ -179,16 +219,48 @@ function getStepSummary(stepName: string, rawOutput: unknown): React.ReactNode |
   return null;
 }
 
-export default function PlanTimeline({ steps, stepStatus, stepOutputs = {} }: PlanTimelineProps) {
+// ── Main component ────────────────────────────────────────────────────────────
+
+export default function PlanTimeline({ steps, stepStatus, stepOutputs = {}, goal, reasoning }: PlanTimelineProps) {
   if (steps.length === 0) return null;
 
-  // Group steps by their layer (steps that start at the same time)
   const doneCount = steps.filter(s => stepStatus[s.id] === 'done').length;
   const totalDone = steps.length > 0 ? Math.round((doneCount / steps.length) * 100) : 0;
+  const allDone = doneCount === steps.length;
+
+  const layerMap = computeLayerMap(steps);
+  // Count how many steps share the same layer (to detect parallel steps)
+  const layerSize = new Map<number, number>();
+  Array.from(layerMap.values()).forEach(layer => {
+    layerSize.set(layer, (layerSize.get(layer) ?? 0) + 1);
+  });
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Header */}
+      {/* ── AI Reasoning section ── */}
+      {(goal || reasoning) && (
+        <div className="border border-zinc-800/60 rounded-xl p-4 bg-zinc-900/30">
+          <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-2">Planner Agent 思考过程</p>
+          {goal && (
+            <p className="text-sm text-zinc-300 mb-2">
+              <span className="text-zinc-600 font-mono text-[10px] mr-2">目标</span>
+              {goal}
+            </p>
+          )}
+          {reasoning && (
+            <div className="space-y-1">
+              {reasoning.split(/[。；;.]/g).filter(s => s.trim().length > 5).slice(0, 4).map((line, i) => (
+                <p key={i} className="text-xs text-zinc-500 flex gap-2">
+                  <span className="text-zinc-700 shrink-0">💭</span>
+                  {line.trim()}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <h2 className="text-xs text-zinc-500 font-mono uppercase tracking-widest">
           DAG 执行计划 — {steps.length} 步
@@ -200,7 +272,7 @@ export default function PlanTimeline({ steps, stepStatus, stepOutputs = {} }: Pl
         )}
       </div>
 
-      {/* Progress bar */}
+      {/* ── Progress bar ── */}
       {doneCount > 0 && (
         <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
           <div
@@ -210,12 +282,14 @@ export default function PlanTimeline({ steps, stepStatus, stepOutputs = {} }: Pl
         </div>
       )}
 
-      {/* Steps */}
+      {/* ── Steps ── */}
       <div className="flex flex-col gap-2">
         {steps.map((step) => {
           const status = stepStatus[step.id] ?? 'pending';
           const rawOutput = stepOutputs[step.id];
           const summary = status === 'done' ? getStepSummary(step.name, rawOutput) : null;
+          const layer = layerMap.get(step.id) ?? 0;
+          const isParallel = (layerSize.get(layer) ?? 1) > 1;
 
           return (
             <div
@@ -223,13 +297,11 @@ export default function PlanTimeline({ steps, stepStatus, stepOutputs = {} }: Pl
               className={`border rounded-lg p-3 transition-all duration-300 ${statusColor[status]}`}
             >
               <div className="flex items-start gap-3">
-                {/* Status icon */}
                 <span className={`font-mono text-base leading-none mt-0.5 w-5 shrink-0 text-center ${statusIconColor[status]}`}>
                   {statusIcon[status]}
                 </span>
 
                 <div className="flex-1 min-w-0">
-                  {/* Step header */}
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-mono text-xs bg-zinc-800/80 px-1.5 py-0.5 rounded text-zinc-400">
                       {step.id}
@@ -238,6 +310,11 @@ export default function PlanTimeline({ steps, stepStatus, stepOutputs = {} }: Pl
                     <span className="text-xs text-zinc-600 bg-zinc-900 px-1.5 py-0.5 rounded">
                       {step.type === 'engine' ? '引擎' : '技能'}
                     </span>
+                    {isParallel && (
+                      <span className="text-xs text-blue-400 bg-blue-950/50 px-1.5 py-0.5 rounded font-mono">
+                        ⚡ 并行
+                      </span>
+                    )}
                     {step.condition && (
                       <span className="text-xs text-violet-400 bg-violet-950/50 px-1.5 py-0.5 rounded font-mono" title={step.condition}>
                         条件执行
@@ -250,17 +327,14 @@ export default function PlanTimeline({ steps, stepStatus, stepOutputs = {} }: Pl
                     )}
                   </div>
 
-                  {/* Why */}
                   <p className="text-xs text-zinc-600 mt-1">{step.why}</p>
 
-                  {/* Output summary (only when done) */}
                   {summary && (
                     <div className="mt-2 pt-2 border-t border-zinc-800/50">
                       {summary}
                     </div>
                   )}
 
-                  {/* Running indicator */}
                   {status === 'running' && (
                     <div className="mt-2 flex items-center gap-2">
                       <div className="flex gap-0.5">
@@ -281,6 +355,14 @@ export default function PlanTimeline({ steps, stepStatus, stepOutputs = {} }: Pl
           );
         })}
       </div>
+
+      {/* ── Completion banner ── */}
+      {allDone && (
+        <div className="border border-emerald-800/40 bg-emerald-950/20 rounded-xl p-4 text-center">
+          <p className="text-emerald-400 font-mono text-sm font-bold">✓ Done. No human in the middle.</p>
+          <p className="text-zinc-600 text-xs mt-1">{steps.length} 步自主执行完成，全程零人工干预</p>
+        </div>
+      )}
     </div>
   );
 }
