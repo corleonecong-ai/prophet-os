@@ -1,0 +1,18 @@
+id: llm.generate
+name: Structured Generate
+description: Generate a structured JSON object that conforms to a given schema, using provided context as source material
+engine: llm
+inputs:
+  - name: schema
+    type: string
+    description: JSON schema description (as a string) defining the expected output structure
+    required: true
+  - name: context
+    type: string
+    description: Source context and instructions for what to generate
+    required: true
+outputs:
+  - name: json
+    type: object
+    description: Generated JSON object conforming to the provided schema
+    required: true

@@ -1,0 +1,22 @@
+id: llm.expand
+name: List Expand
+description: Given a seed concept and criteria, expand into N diverse, specific items (keywords, features, use cases, etc.)
+engine: llm
+inputs:
+  - name: seed
+    type: string
+    description: Seed concept or starting point for expansion
+    required: true
+  - name: n
+    type: number
+    description: Number of items to generate
+    required: true
+  - name: criteria
+    type: string
+    description: Criteria for what makes a good item in this list (specificity, language, category, etc.)
+    required: true
+outputs:
+  - name: items
+    type: array
+    description: Array of generated string items
+    required: true

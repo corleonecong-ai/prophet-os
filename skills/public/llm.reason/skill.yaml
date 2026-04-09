@@ -1,0 +1,26 @@
+id: llm.reason
+name: Reasoning Analysis
+description: Given a set of facts and a question, reason step by step and produce a structured answer with reasoning chain
+engine: llm
+inputs:
+  - name: facts
+    type: string
+    description: Relevant facts, data, or context to reason from
+    required: true
+  - name: question
+    type: string
+    description: The analytical question to answer
+    required: true
+outputs:
+  - name: answer
+    type: string
+    description: The conclusion or answer to the question
+    required: true
+  - name: steps
+    type: array
+    description: Step-by-step reasoning chain leading to the answer
+    required: true
+  - name: burst_prob
+    type: number
+    description: If the question involves burst/viral probability, the numeric value 0.0-1.0
+    required: false

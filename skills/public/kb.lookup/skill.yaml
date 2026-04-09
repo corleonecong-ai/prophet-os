@@ -1,0 +1,22 @@
+id: kb.lookup
+name: Knowledge Base Lookup
+description: Query the Atlas ontology knowledge base for structured information about a product category (attributes, compliance, keywords, competitors, price range)
+engine: atlas
+inputs:
+  - name: entity
+    type: string
+    description: Product or category name to look up (e.g. "outdoor coffee maker")
+    required: true
+  - name: domain
+    type: string
+    description: Knowledge domain to retrieve (product_category | compliance | keywords | competitors | price_range)
+    required: true
+  - name: market
+    type: string
+    description: Target market code (e.g. DE, US, UK, JP)
+    required: false
+outputs:
+  - name: entry
+    type: object
+    description: Structured knowledge entry for the requested entity and domain
+    required: true

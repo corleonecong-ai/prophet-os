@@ -1,0 +1,30 @@
+id: llm.simulate
+name: Persona Simulation
+description: Simulate N consumer personas from a given role distribution evaluating a target product. Returns per-persona scores and an aggregate summary.
+engine: prophet
+inputs:
+  - name: role_distribution
+    type: string
+    description: Description of the persona population to simulate (demographics, segments, weights)
+    required: true
+  - name: target
+    type: string
+    description: Product or concept being evaluated by the personas
+    required: true
+  - name: n
+    type: number
+    description: Number of personas to simulate (default 50, max 50)
+    required: true
+outputs:
+  - name: personas
+    type: array
+    description: Array of persona objects with id, segment, score (1-10), reason, and objection fields
+    required: true
+  - name: summary
+    type: string
+    description: Narrative summary of collective persona reactions and key themes
+    required: true
+  - name: score
+    type: number
+    description: Average score across all personas (1.0-10.0)
+    required: true

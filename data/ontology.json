@@ -1,0 +1,362 @@
+{
+  "outdoor_coffee_maker": {
+    "entity": "outdoor coffee maker",
+    "category": "Outdoor & Camping",
+    "subcategory": "Portable Beverage Equipment",
+    "attributes": [
+      "portable",
+      "battery-powered or manual",
+      "espresso or filter",
+      "weight 300-800g",
+      "waterproof",
+      "USB-C chargeable",
+      "pressure 15-20 bar (espresso)"
+    ],
+    "price_range": { "min": 49, "max": 199, "currency": "EUR", "sweet_spot": 89 },
+    "market_maturity": "growing",
+    "top_competitors": ["Wacaco Nanopresso", "Handpresso", "AeroPress Go", "Conqueco"],
+    "compliance": {
+      "DE": {
+        "certifications_required": ["CE", "WEEE", "RoHS"],
+        "regulations": [
+          "ElektroG (German WEEE implementation)",
+          "Low Voltage Directive 2014/35/EU",
+          "EMC Directive 2014/30/EU",
+          "Food Contact Materials Regulation EC 1935/2004"
+        ],
+        "restrictions": [
+          "Battery must comply with EU Battery Regulation 2023/1542",
+          "No BPA in food-contact parts"
+        ],
+        "labeling_requirements": [
+          "WEEE symbol on product and packaging",
+          "CE marking on product",
+          "German language instructions required",
+          "Manufacturer/importer EU address on packaging"
+        ]
+      }
+    },
+    "keywords": {
+      "DE": {
+        "primary": ["Outdoor Kaffeemaschine", "Camping Espressomaschine", "tragbare Kaffeemaschine", "Reise Kaffeemaschine"],
+        "long_tail": ["Espressomaschine ohne Strom Camping", "tragbare Espressomaschine Akku", "Kaffeemaschine fürs Zelt", "Camping Kaffee Outdoor espresso"],
+        "negative": ["Haushalts-Kaffeemaschine", "Siebträger stationär"]
+      }
+    },
+    "amazon_category_path": "Sport & Freizeit > Camping & Wandern > Camping-Küche > Kaffee & Tee"
+  },
+
+  "portable_blender": {
+    "entity": "portable blender",
+    "category": "Kitchen & Dining",
+    "subcategory": "Portable Blenders",
+    "attributes": [
+      "USB-C rechargeable",
+      "BPA-free",
+      "capacity 300-600ml",
+      "6-8 blades stainless steel",
+      "self-cleaning",
+      "weight under 500g"
+    ],
+    "price_range": { "min": 19, "max": 79, "currency": "EUR", "sweet_spot": 39 },
+    "market_maturity": "mature",
+    "top_competitors": ["BlendJet", "Nutribullet Go", "MEXTOP", "Juicer Portable"],
+    "compliance": {
+      "DE": {
+        "certifications_required": ["CE", "WEEE", "RoHS", "GS (preferred)"],
+        "regulations": [
+          "Low Voltage Directive 2014/35/EU",
+          "Food Contact Materials Regulation EC 1935/2004",
+          "ElektroG"
+        ],
+        "restrictions": ["No BPA in all food-contact components"],
+        "labeling_requirements": ["CE marking", "WEEE symbol", "German manual", "EU address"]
+      }
+    },
+    "keywords": {
+      "DE": {
+        "primary": ["tragbarer Mixer", "Smoothie Mixer USB", "Mini Blender", "Reise Blender"],
+        "long_tail": ["Smoothie Maker für unterwegs", "tragbarer Mixer USB aufladbar", "Mini Mixer Camping Sport"],
+        "negative": ["Standmixer", "Küchenmaschine"]
+      }
+    },
+    "amazon_category_path": "Küche, Haushalt & Wohnen > Küchengeräte > Mixer & Rührgeräte"
+  },
+
+  "solar_charger": {
+    "entity": "solar charger",
+    "category": "Electronics",
+    "subcategory": "Solar & Outdoor Power",
+    "attributes": [
+      "foldable panels",
+      "10-40W output",
+      "USB-A + USB-C ports",
+      "IP65 waterproof",
+      "compatible with power banks",
+      "weight 400g-1.2kg"
+    ],
+    "price_range": { "min": 29, "max": 149, "currency": "EUR", "sweet_spot": 59 },
+    "market_maturity": "growing",
+    "top_competitors": ["BigBlue", "Anker PowerPort Solar", "Goal Zero", "BLAVOR"],
+    "compliance": {
+      "DE": {
+        "certifications_required": ["CE", "WEEE", "RoHS"],
+        "regulations": ["Low Voltage Directive 2014/35/EU", "EMC Directive 2014/30/EU", "ElektroG"],
+        "restrictions": ["Battery cells must meet IEC 62133"],
+        "labeling_requirements": ["CE marking", "WEEE symbol", "German manual", "Watt output clearly labeled"]
+      }
+    },
+    "keywords": {
+      "DE": {
+        "primary": ["Solarpanel tragbar", "Solar Ladegerät", "Faltbares Solarpanel", "Solar Powerbank"],
+        "long_tail": ["Solar Ladegerät Camping faltbar", "tragbares Solarpanel USB C", "Outdoor Solar Charger wasserdicht"],
+        "negative": ["Dach Solarpanel", "stationär Solar"]
+      }
+    },
+    "amazon_category_path": "Elektronik > Akkus & Ladegeräte > Solarladegeräte"
+  },
+
+  "camping_stove": {
+    "entity": "camping stove",
+    "category": "Outdoor & Camping",
+    "subcategory": "Camp Stoves & Accessories",
+    "attributes": [
+      "gas or alcohol fuel",
+      "foldable",
+      "weight under 100g (backpacking) to 1kg (car camping)",
+      "boil time 3-5 min per 1L",
+      "windscreen included",
+      "piezo ignition"
+    ],
+    "price_range": { "min": 15, "max": 199, "currency": "EUR", "sweet_spot": 45 },
+    "market_maturity": "mature",
+    "top_competitors": ["MSR PocketRocket", "Primus Lite+", "Jetboil Flash", "BRS-3000T"],
+    "compliance": {
+      "DE": {
+        "certifications_required": ["CE", "EN 521 (gas appliances)"],
+        "regulations": [
+          "Gas Appliances Regulation 2016/426/EU",
+          "Pressure Equipment Directive 2014/68/EU (if applicable)"
+        ],
+        "restrictions": ["Must use standard EN 417 gas cartridges", "No butane-only below 0°C claims"],
+        "labeling_requirements": ["CE marking", "German safety instructions", "Fuel type clearly marked"]
+      }
+    },
+    "keywords": {
+      "DE": {
+        "primary": ["Campingkocher", "Trekking Kocher", "Gaskocher Outdoor", "Backpacking Kocher"],
+        "long_tail": ["leichter Camping Gaskocher", "faltbarer Campingkocher ultraleicht", "Campingkocher mit Piezo Zündung"],
+        "negative": ["Grill", "Herd", "Kochplatte Haushalt"]
+      }
+    },
+    "amazon_category_path": "Sport & Freizeit > Camping & Wandern > Camping-Küche > Campingkocher"
+  },
+
+  "electric_cooler": {
+    "entity": "electric cooler",
+    "category": "Outdoor & Camping",
+    "subcategory": "Portable Refrigerators & Coolers",
+    "attributes": [
+      "compressor or thermoelectric",
+      "capacity 20-60L",
+      "12V/24V DC + 110-240V AC",
+      "temperature range -20°C to +10°C (compressor)",
+      "USB monitoring app",
+      "weight 8-18kg"
+    ],
+    "price_range": { "min": 149, "max": 699, "currency": "EUR", "sweet_spot": 299 },
+    "market_maturity": "growing",
+    "top_competitors": ["Dometic CFX3", "EcoFlow GLACIER", "BougeRV", "Alpicool"],
+    "compliance": {
+      "DE": {
+        "certifications_required": ["CE", "WEEE", "RoHS", "ErP (Ecodesign)"],
+        "regulations": ["Low Voltage Directive", "EMC Directive", "ElektroG", "F-Gas Regulation if applicable"],
+        "restrictions": ["Refrigerants must comply with EU F-Gas Regulation"],
+        "labeling_requirements": ["CE marking", "Energy label", "WEEE symbol", "German manual"]
+      }
+    },
+    "keywords": {
+      "DE": {
+        "primary": ["elektrische Kühlbox", "Kompressor Kühlbox", "tragbarer Kühlschrank", "12V Kühlbox"],
+        "long_tail": ["Kompressor Kühlbox Auto Camping", "tragbarer Kühlschrank 12V 24V", "elektrische Kühlbox ohne Eis"],
+        "negative": ["Styropor Kühlbox", "passive Kühlbox"]
+      }
+    },
+    "amazon_category_path": "Sport & Freizeit > Camping & Wandern > Kühlboxen & Kühltaschen"
+  },
+
+  "smart_water_bottle": {
+    "entity": "smart water bottle",
+    "category": "Sports & Outdoors",
+    "subcategory": "Hydration & Water Bottles",
+    "attributes": [
+      "hydration tracking LED",
+      "temperature display",
+      "BPA-free Tritan or stainless steel",
+      "capacity 500-750ml",
+      "USB-C charging",
+      "app connectivity (optional)"
+    ],
+    "price_range": { "min": 19, "max": 89, "currency": "EUR", "sweet_spot": 39 },
+    "market_maturity": "emerging",
+    "top_competitors": ["HidrateSpark", "LARQ", "Owala FreeSip", "Hydracy"],
+    "compliance": {
+      "DE": {
+        "certifications_required": ["CE (if electronic)", "WEEE (if electronic)", "Food Contact Materials"],
+        "regulations": ["Food Contact Materials Regulation EC 1935/2004", "ElektroG (if battery included)"],
+        "restrictions": ["No BPA, no BPS in contact parts", "No lead in valve components"],
+        "labeling_requirements": ["Food-safe symbol", "German language instructions", "CE if electronic"]
+      }
+    },
+    "keywords": {
+      "DE": {
+        "primary": ["smarte Trinkflasche", "Trinkflasche mit LED", "Wasserflasche Hydration Tracker", "intelligente Trinkflasche"],
+        "long_tail": ["Trinkflasche mit Temperaturanzeige", "Hydration Tracker Trinkflasche Sport", "BPA freie Trinkflasche LED"],
+        "negative": ["Einwegflasche", "Glasflasche einfach"]
+      }
+    },
+    "amazon_category_path": "Sport & Freizeit > Sport > Outdoor-Sport > Wandern & Trekking > Trinkflaschen"
+  },
+
+  "led_camping_lantern": {
+    "entity": "led camping lantern",
+    "category": "Outdoor & Camping",
+    "subcategory": "Camping Lights & Lanterns",
+    "attributes": [
+      "rechargeable via USB-C or solar",
+      "lumens 300-2000",
+      "IPX4-IPX6 waterproof",
+      "collapsible or inflatable",
+      "warm + cool light modes",
+      "power bank function"
+    ],
+    "price_range": { "min": 15, "max": 69, "currency": "EUR", "sweet_spot": 29 },
+    "market_maturity": "mature",
+    "top_competitors": ["Black Diamond Moji", "Goal Zero Crush", "MPOWERD Luci", "ETEKCITY"],
+    "compliance": {
+      "DE": {
+        "certifications_required": ["CE", "WEEE", "RoHS"],
+        "regulations": ["Low Voltage Directive", "EMC Directive", "ElektroG"],
+        "restrictions": ["Battery cells must meet IEC 62133"],
+        "labeling_requirements": ["CE marking", "WEEE symbol", "Lumen output on packaging", "German manual"]
+      }
+    },
+    "keywords": {
+      "DE": {
+        "primary": ["Campinglaterne", "LED Laterne Camping", "aufblasbare Campinglampe", "Solar Campinglaterne"],
+        "long_tail": ["USB aufladbare Campinglaterne", "wasserdichte LED Laterne Outdoor", "Camping Laterne mit Powerbank"],
+        "negative": ["Kerzenlaterne", "Öllaterne", "Gaslicht"]
+      }
+    },
+    "amazon_category_path": "Sport & Freizeit > Camping & Wandern > Camping-Beleuchtung > Laternen"
+  },
+
+  "air_purifier_car": {
+    "entity": "car air purifier",
+    "category": "Automotive",
+    "subcategory": "Car Interior Accessories",
+    "attributes": [
+      "HEPA + activated carbon filter",
+      "12V cigarette lighter or USB",
+      "CADR 10-30 m³/h",
+      "silent <25dB",
+      "PM2.5 sensor + display",
+      "compact cup-holder size"
+    ],
+    "price_range": { "min": 19, "max": 99, "currency": "EUR", "sweet_spot": 45 },
+    "market_maturity": "growing",
+    "top_competitors": ["Philips GoPure", "LEVOIT Core Mini Car", "WINIX ZERO", "Honeywell"],
+    "compliance": {
+      "DE": {
+        "certifications_required": ["CE", "WEEE", "RoHS", "E-Mark (preferred)"],
+        "regulations": ["Low Voltage Directive", "EMC Directive", "ElektroG"],
+        "restrictions": ["No ozone-generating ionizers (EU regulation)"],
+        "labeling_requirements": ["CE marking", "WEEE symbol", "CADR value on packaging", "Filter replacement indicator"]
+      }
+    },
+    "keywords": {
+      "DE": {
+        "primary": ["Auto Luftreiniger", "KFZ Luftfilter", "Autoluftfilter HEPA", "Luftreiniger Fahrzeug"],
+        "long_tail": ["HEPA Luftreiniger fürs Auto", "Auto Luftreiniger USB 12V", "PM2.5 Sensor Auto Luftfilter"],
+        "negative": ["Raumluftfilter", "Hausluftfilter stationär"]
+      }
+    },
+    "amazon_category_path": "Auto & Motorrad > Autozubehör > Innenausstattung > Luftreiniger & Ionisatoren"
+  },
+
+  "wireless_earbuds_sport": {
+    "entity": "wireless sport earbuds",
+    "category": "Electronics",
+    "subcategory": "Headphones & Earbuds",
+    "attributes": [
+      "IPX5-IPX7 sweat/waterproof",
+      "Bluetooth 5.3",
+      "ANC or ambient mode",
+      "battery 6-10h + case 24-40h",
+      "sport hooks or wings",
+      "dual mic ENC for calls"
+    ],
+    "price_range": { "min": 19, "max": 149, "currency": "EUR", "sweet_spot": 49 },
+    "market_maturity": "mature",
+    "top_competitors": ["Jabra Elite Active", "Beats Fit Pro", "Soundcore Sport X10", "JBL Reflect"],
+    "compliance": {
+      "DE": {
+        "certifications_required": ["CE", "WEEE", "RoHS", "RED (Radio Equipment Directive)"],
+        "regulations": ["Radio Equipment Directive 2014/53/EU", "ElektroG", "Battery Regulation 2023/1542"],
+        "restrictions": ["Max output level 85dB default (EU audio safety)", "SAR compliance for Bluetooth"],
+        "labeling_requirements": ["CE marking", "WEEE symbol", "RED declaration of conformity", "German manual"]
+      }
+    },
+    "keywords": {
+      "DE": {
+        "primary": ["Sport Kopfhörer kabellos", "In-Ear Sport Bluetooth", "wasserdichte Ohrhörer Sport", "True Wireless Earbuds Sport"],
+        "long_tail": ["kabellose Sport Kopfhörer wasserdicht Bluetooth 5", "ANC Earbuds Sport Fitnessstudio", "In-Ear Kopfhörer Sport Nackenband"],
+        "negative": ["kabelgebunden", "Over-Ear Studio", "DJ Kopfhörer"]
+      }
+    },
+    "amazon_category_path": "Elektronik > Kopfhörer & Headsets > In-Ear-Kopfhörer > Sport In-Ear-Kopfhörer"
+  },
+
+  "portable_power_station": {
+    "entity": "portable power station",
+    "category": "Electronics",
+    "subcategory": "Portable Power Stations",
+    "attributes": [
+      "capacity 100-2000Wh LiFePO4 or NMC",
+      "AC output 100-2000W",
+      "solar input 60-800W",
+      "USB-C 100W PD",
+      "12V car output",
+      "display with watt/percentage",
+      "weight 1.5-22kg"
+    ],
+    "price_range": { "min": 149, "max": 2999, "currency": "EUR", "sweet_spot": 499 },
+    "market_maturity": "growing",
+    "top_competitors": ["EcoFlow DELTA", "Jackery Explorer", "Bluetti AC200P", "Anker SOLIX"],
+    "compliance": {
+      "DE": {
+        "certifications_required": ["CE", "WEEE", "RoHS", "UN 38.3 (battery transport)"],
+        "regulations": [
+          "Low Voltage Directive 2014/35/EU",
+          "EMC Directive 2014/30/EU",
+          "EU Battery Regulation 2023/1542",
+          "ElektroG"
+        ],
+        "restrictions": [
+          "LiFePO4 cells preferred for compliance longevity",
+          "Must include overcharge/discharge protection",
+          "Transport restrictions for >100Wh lithium batteries"
+        ],
+        "labeling_requirements": ["CE marking", "WEEE symbol", "Wh capacity prominently on label", "German safety manual", "Battery chemistry labeled"]
+      }
+    },
+    "keywords": {
+      "DE": {
+        "primary": ["Powerstation tragbar", "mobile Powerstation", "tragbarer Stromspeicher", "Solar Generator Camping"],
+        "long_tail": ["portable Powerstation LiFePO4 Camping", "mobile Powerstation mit Solar Eingang", "tragbarer Stromspeicher Wohnmobil"],
+        "negative": ["USV Anlage stationär", "Notstromgenerator Benzin"]
+      }
+    },
+    "amazon_category_path": "Elektronik > Akkus & Ladegeräte > Tragbare Powerstationen"
+  }
+}
