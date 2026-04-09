@@ -963,7 +963,7 @@ export async function POST(req: NextRequest) {
 | ✅ **10** | **DAG Runner + `/api/execute`** | 实现完整 DAG Runner（Kahn 拓排 + 并行执行 + condition 求值 + onEvent 回调）；实现 SSE `/api/execute` 路由 | `lib/claw/dag-runner.ts` `lib/claw/queue.ts` `app/api/execute/route.ts` | Claude Code | `curl -N -X POST localhost:3000/api/execute -H 'Content-Type: application/json' -d '{"plan":{...2步简单plan...}}'` → 看到 SSE 事件流：`data: {"type":"step_started"...}` `data: {"type":"step_done"...}` | 20 min |
 | ✅ **11** | **骨架路由** | 实现 `/api/skill/[id]`、`/api/engine/[name]`、`/api/intent`、`/api/webhook/result` 四个路由 | `app/api/skill/[id]/route.ts` `app/api/engine/[name]/route.ts` `app/api/intent/route.ts` `app/api/webhook/result/route.ts` | Claude Code | `curl -X POST localhost:3000/api/intent -d '{}'` → 202；`curl -X POST localhost:3000/api/webhook/result -d '{}'` → 200 | 5 min |
 | ✅ **12** | **前端单页** | 实现 `app/page.tsx` 状态机 + 4 个组件（IntentInput、PlanTimeline、ExecutionStream、FinalReport）；接入 `/api/plan` 和 SSE `/api/execute` | `app/layout.tsx` `app/page.tsx` `app/globals.css` `components/*.tsx`（4 个） | Claude Code（可用 Gemini CLI 辅助 UI） | 浏览器 localhost:3000 → 输入意图 → 点击 Plan & Run → 看到 DAG 时间线和执行流 | 25 min |
-| **13** | **端到端测试** | 手动走一遍完整流程：输入 Demo 意图，验证全部 5 个成功标准；修复任何 bug | — | 人工 + Claude Code 修复 | 全流程：目测 5 步成功标准全部达成 | 10 min |
+| ✅ **13** | **端到端测试** | 手动走一遍完整流程：输入 Demo 意图，验证全部 5 个成功标准；修复任何 bug | — | 人工 + Claude Code 修复 | 全流程：目测 5 步成功标准全部达成 | 10 min |
 | ✅ **14** | **README** | 编写 README：一句话定位、3 步启动、Demo 意图示例、架构 ASCII 图 | `README.md` | Claude Code（writer 模式） | `cat README.md` → 包含启动命令和演示意图 | 5 min |
 
 **总计：170 分钟（约 2h50min）**

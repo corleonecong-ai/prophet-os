@@ -65,9 +65,9 @@ function evaluateCondition(condition: string | null, context: Map<string, StepRe
   if (resolved.trim() === 'true') return true;
   if (resolved.trim() === 'false') return false;
 
-  // Default: condition present but unparseable → run the step
-  console.warn(`[DAG] Could not evaluate condition: "${resolved}" — defaulting to true`);
-  return true;
+  // Default: condition present but unparseable → SKIP the step (safe default)
+  console.warn(`[DAG] Could not evaluate condition: "${resolved}" — defaulting to false (skipping)`);
+  return false;
 }
 
 // --- Topological Sort (Kahn's Algorithm) → layers for parallel execution ---
@@ -113,13 +113,24 @@ function topoSort(steps: PlanStep[]): PlanStep[][] {
 
 function resolveInputs(inputs: Record<string, unknown>, context: Map<string, StepResult>): Record<string, unknown> {
   const str = JSON.stringify(inputs);
-  const resolved = str.replace(/\{\{(\w+)\.output\.(\w+)\}\}/g, (match, stepId: string, field: string) => {
+
+  // First pass: resolve {{sN.output.field}} → specific field value
+  let resolved = str.replace(/\{\{(\w+)\.output\.(\w+)\}\}/g, (match, stepId: string, field: string) => {
     const result = context.get(stepId);
     const val = (result?.output as Record<string, unknown> | undefined)?.[field];
     if (val === undefined) return match;
     if (typeof val === 'string') return val;
     return JSON.stringify(val);
   });
+
+  // Second pass: resolve {{sN.output}} → full output object (no field specified)
+  resolved = resolved.replace(/\{\{(\w+)\.output\}\}/g, (match, stepId: string) => {
+    const result = context.get(stepId);
+    if (!result?.output) return match;
+    if (typeof result.output === 'string') return result.output;
+    return JSON.stringify(result.output);
+  });
+
   try {
     return JSON.parse(resolved) as Record<string, unknown>;
   } catch {

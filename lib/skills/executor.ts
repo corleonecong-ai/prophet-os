@@ -61,5 +61,23 @@ export async function executeSkill(
   });
 
   const raw = response.content[0].type === 'text' ? response.content[0].text : '';
-  return parseOutput(raw);
+  const output = parseOutput(raw);
+
+  // Post-process llm.reason: extract burst_prob from text if LLM didn't output structured JSON
+  if (skill.id === 'llm.reason' && typeof output === 'object' && output !== null) {
+    const o = output as Record<string, unknown>;
+    if (o.burst_prob === undefined) {
+      // Try to extract a number between 0 and 1 from the raw text
+      const probMatch = raw.match(/burst_prob["\s:]+([01]?\.\d+)/);
+      if (probMatch) {
+        o.burst_prob = parseFloat(probMatch[1]);
+      } else {
+        // Extract any probability-looking number from the text (0.XX pattern)
+        const anyProbMatch = raw.match(/\b(0\.\d{1,2})\b/);
+        o.burst_prob = anyProbMatch ? parseFloat(anyProbMatch[1]) : 0.5;
+      }
+    }
+  }
+
+  return output;
 }
