@@ -67,12 +67,61 @@ function getDuration(raw: unknown): number | null {
 
 // ── extractor: scans all step outputs and pulls structured data ───────────────
 
+interface AidaScores {
+  awareness: number;
+  interest: number;
+  desire: number;
+  purchase_intent: number;
+  advocacy: number;
+}
+
+interface PersonaSegment {
+  name: string;
+  size_pct: number;
+  intent: number;
+  description: string;
+  key_quote?: string;
+}
+
+interface DriverBlocker {
+  factor: string;
+  weight: number;
+  evidence?: string;
+}
+
+interface RichPersonaVoice {
+  name?: string;
+  segment?: string;
+  score?: number;
+  aida?: AidaScores;
+  voice?: {
+    first_reaction?: string;
+    concerns?: string[];
+    hot_buttons?: string[];
+    would_buy_if?: string;
+    would_not_buy_if?: string;
+  };
+  cultural_anchors?: string[];
+  decision_journey?: {
+    willingness_to_pay_usd?: number;
+    deal_breakers?: string[];
+    deal_makers?: string[];
+  };
+}
+
 interface ExtractedData {
   // Prophet
   personas: Array<{ name?: string; score?: number; verdict?: string; quote?: string }>;
+  richPersonas: RichPersonaVoice[];
   avgScore: number | null;
   burstProb: number | null;
   simulationSummary: string | null;
+  aida: AidaScores | null;
+  segments: PersonaSegment[];
+  topDrivers: DriverBlocker[];
+  topBlockers: DriverBlocker[];
+  actionableInsights: string[];
+  rationale: string | null;
   // Atlas
   category: string | null;
   subcategory: string | null;
@@ -104,7 +153,8 @@ interface ExtractedData {
 
 function extractAllData(stepOutputs: Record<string, unknown>): ExtractedData {
   const result: ExtractedData = {
-    personas: [], avgScore: null, burstProb: null, simulationSummary: null,
+    personas: [], richPersonas: [], avgScore: null, burstProb: null, simulationSummary: null,
+    aida: null, segments: [], topDrivers: [], topBlockers: [], actionableInsights: [], rationale: null,
     category: null, subcategory: null, marketMaturity: null,
     topCompetitors: [], priceRange: null, certifications: [], atlasSummary: null,
     listingTitle: null, listingBullets: [], listingDescription: null, listingKeywords: [],
@@ -152,15 +202,54 @@ function extractAllData(stepOutputs: Record<string, unknown>): ExtractedData {
 
     // ── Prophet / llm.simulate ──
     if (Array.isArray(d.personas)) {
-      result.personas = (d.personas as Array<Record<string, unknown>>).map(p => ({
+      const rawPersonas = d.personas as Array<Record<string, unknown>>;
+      result.personas = rawPersonas.map(p => {
+        // Compute score from AIDA or direct score
+        let score: number | undefined;
+        if (typeof p.score === 'number') score = p.score;
+        else if (p.scores && typeof p.scores === 'object') {
+          const s = p.scores as Record<string, unknown>;
+          const vals = [s.awareness, s.interest, s.desire, s.purchase_intent, s.advocacy]
+            .filter((v): v is number => typeof v === 'number');
+          score = vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : undefined;
+        }
+        const voice = p.voice as Record<string, unknown> | undefined;
+        return {
+          name: typeof p.name === 'string' ? p.name : undefined,
+          score,
+          verdict: typeof p.verdict === 'string' ? p.verdict : undefined,
+          quote: voice?.first_reaction
+            ? String(voice.first_reaction)
+            : typeof p.reason === 'string' ? p.reason : undefined,
+        };
+      });
+
+      // Rich personas for voice cards
+      result.richPersonas = rawPersonas.slice(0, 6).map(p => ({
         name: typeof p.name === 'string' ? p.name : undefined,
+        segment: typeof p.segment === 'string' ? p.segment : undefined,
         score: typeof p.score === 'number' ? p.score : undefined,
-        verdict: typeof p.verdict === 'string' ? p.verdict : undefined,
-        quote: typeof p.quote === 'string' ? p.quote : typeof p.comment === 'string' ? p.comment : undefined,
+        aida: (p.scores && typeof p.scores === 'object') ? p.scores as AidaScores : undefined,
+        cultural_anchors: Array.isArray(p.cultural_anchors) ? p.cultural_anchors as string[] : undefined,
+        voice: (p.voice && typeof p.voice === 'object') ? p.voice as RichPersonaVoice['voice'] : undefined,
+        decision_journey: (p.decision_journey && typeof p.decision_journey === 'object')
+          ? p.decision_journey as RichPersonaVoice['decision_journey']
+          : undefined,
       }));
+
       if (typeof d.score === 'number') result.avgScore = d.score;
       if (typeof d.burst_prob === 'number') result.burstProb = d.burst_prob;
       if (typeof d.summary === 'string') result.simulationSummary = d.summary;
+
+      // AIDA
+      if (d.aida && typeof d.aida === 'object') result.aida = d.aida as AidaScores;
+
+      // Market insights
+      if (Array.isArray(d.segments)) result.segments = d.segments as PersonaSegment[];
+      if (Array.isArray(d.top_drivers)) result.topDrivers = d.top_drivers as DriverBlocker[];
+      if (Array.isArray(d.top_blockers)) result.topBlockers = d.top_blockers as DriverBlocker[];
+      if (Array.isArray(d.actionable_insights)) result.actionableInsights = d.actionable_insights as string[];
+      if (typeof d.rationale === 'string') result.rationale = d.rationale;
     }
 
     // ── llm.reason ──
@@ -269,14 +358,6 @@ export default function FinalReport({ stepOutputs }: FinalReportProps) {
   const burstPct = Math.round(burstProb * 100);
   const isViable = burstPct >= 50;
 
-  const topPersonas = d.personas.filter(p => p.score !== undefined).sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-  const scoreDistribution = [
-    { label: '9-10', count: d.personas.filter(p => (p.score ?? 0) >= 9).length, color: 'bg-emerald-400' },
-    { label: '7-8', count: d.personas.filter(p => (p.score ?? 0) >= 7 && (p.score ?? 0) < 9).length, color: 'bg-emerald-600' },
-    { label: '5-6', count: d.personas.filter(p => (p.score ?? 0) >= 5 && (p.score ?? 0) < 7).length, color: 'bg-yellow-500' },
-    { label: '1-4', count: d.personas.filter(p => (p.score ?? 0) > 0 && (p.score ?? 0) < 5).length, color: 'bg-red-500' },
-  ];
-  const maxDistCount = Math.max(...scoreDistribution.map(s => s.count), 1);
 
   const totalSecs = d.totalDuration !== null ? (d.totalDuration / 1000).toFixed(1) : null;
   const longestStep = d.stepDurations.sort((a, b) => b.ms - a.ms)[0];
@@ -360,57 +441,173 @@ export default function FinalReport({ stepOutputs }: FinalReportProps) {
           <SectionHeader
             icon="🔮"
             title="Prophet Engine — 买家 Persona 模拟"
-            subtitle={`基于消费者心理模型的多维度打分 · ${d.personas.length > 0 ? `${d.personas.length} 个 persona 已模拟` : '推理引擎综合评估'}`}
+            subtitle={`7维立体画像 · AIDA漏斗 · 驱动/阻碍分析 · ${d.personas.length > 0 ? `${d.personas.length} 个真实买家模拟` : '推理引擎综合评估'}`}
           />
 
-          {/* Score distribution histogram */}
-          {scoreDistribution.some(s => s.count > 0) && (
+              {/* AIDA Funnel */}
+          {d.aida && (
             <div className="mb-5">
-              <p className="text-[10px] text-zinc-600 font-mono mb-3 uppercase tracking-wider">评分分布</p>
-              <div className="flex items-end gap-3 h-20">
-                {scoreDistribution.map(bucket => (
-                  <div key={bucket.label} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-mono text-zinc-500">{bucket.count}</span>
-                    <div className="w-full flex items-end justify-center">
+              <p className="text-[10px] text-zinc-600 font-mono mb-3 uppercase tracking-wider">AIDA 漏斗分析</p>
+              {(
+                [
+                  ['awareness',      '认知 Awareness',   d.aida.awareness],
+                  ['interest',       '兴趣 Interest',    d.aida.interest],
+                  ['desire',         '渴望 Desire',      d.aida.desire],
+                  ['purchase_intent','购买 Purchase',    d.aida.purchase_intent],
+                  ['advocacy',       '推荐 Advocacy',    d.aida.advocacy],
+                ] as [string, string, number][]
+              ).map(([key, label, val]) => {
+                const pct = val * 10;
+                const color = pct >= 70 ? 'bg-emerald-500' : pct >= 50 ? 'bg-yellow-500' : 'bg-red-500';
+                return (
+                  <div key={key} className="flex items-center gap-3 mb-2">
+                    <span className="text-[10px] text-zinc-500 w-28 shrink-0">{label}</span>
+                    <div className="flex-1 h-4 bg-zinc-800 rounded overflow-hidden">
+                      <div className={`h-full ${color} opacity-80 rounded`} style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="text-[10px] font-mono text-zinc-400 w-12 text-right shrink-0">{val.toFixed(1)}/10</span>
+                  </div>
+                );
+              })}
+              {d.rationale && (
+                <p className="text-[10px] text-zinc-600 mt-2 italic border-l-2 border-zinc-800 pl-2">{d.rationale}</p>
+              )}
+            </div>
+          )}
+
+          {/* Persona Voice Cards */}
+          {d.richPersonas.length > 0 && (
+            <div className="mb-5">
+              <p className="text-[10px] text-zinc-600 font-mono mb-3 uppercase tracking-wider">买家真实声音 · Persona Voices</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {d.richPersonas.slice(0, 4).map((p, i) => {
+                  const personaScore = p.aida
+                    ? (Object.values(p.aida).reduce((a, b) => a + b, 0) / 5)
+                    : (p.score ?? null);
+                  const scoreColor = personaScore && personaScore >= 7 ? 'text-emerald-400' : personaScore && personaScore >= 5 ? 'text-yellow-400' : 'text-red-400';
+                  return (
+                    <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <span className="text-xs font-semibold text-zinc-200">{p.name ?? `Persona ${i + 1}`}</span>
+                          {p.cultural_anchors && p.cultural_anchors.length > 0 && (
+                            <p className="text-[10px] text-zinc-600 mt-0.5">{p.cultural_anchors.slice(0, 2).join(' · ')}</p>
+                          )}
+                        </div>
+                        {personaScore !== null && (
+                          <span className={`text-xs font-bold font-mono ${scoreColor}`}>{personaScore.toFixed(1)}</span>
+                        )}
+                      </div>
+                      {p.voice?.first_reaction && (
+                        <p className="text-[11px] text-zinc-400 italic border-l-2 border-zinc-700 pl-2 mb-1.5">
+                          "{p.voice.first_reaction}"
+                        </p>
+                      )}
+                      {p.voice?.hot_buttons && p.voice.hot_buttons.length > 0 && (
+                        <p className="text-[10px] text-emerald-600">✓ {p.voice.hot_buttons[0]}</p>
+                      )}
+                      {p.voice?.concerns && p.voice.concerns.length > 0 && (
+                        <p className="text-[10px] text-red-600/70 mt-0.5">✗ {p.voice.concerns[0]}</p>
+                      )}
+                      {p.decision_journey?.willingness_to_pay_usd && (
+                        <p className="text-[10px] text-zinc-600 mt-1">价格上限: ${p.decision_journey.willingness_to_pay_usd}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {d.personas.length > 4 && (
+                <p className="text-[10px] text-zinc-600 font-mono mt-2 pl-1">+ {d.personas.length - 4} 个 persona 数据已纳入统计</p>
+              )}
+            </div>
+          )}
+
+          {/* Segments */}
+          {d.segments.length > 0 && (
+            <div className="mb-5">
+              <p className="text-[10px] text-zinc-600 font-mono mb-3 uppercase tracking-wider">买家细分群体</p>
+              <div className="space-y-2">
+                {d.segments.map((seg, i) => (
+                  <div key={i} className="bg-zinc-900 rounded-lg p-3 border border-zinc-800">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-semibold text-zinc-200">{seg.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-zinc-600 font-mono">{seg.size_pct}%</span>
+                        <span className={`text-[10px] font-bold font-mono ${seg.intent >= 7 ? 'text-emerald-400' : seg.intent >= 5 ? 'text-yellow-400' : 'text-red-400'}`}>
+                          {seg.intent.toFixed(1)}/10
+                        </span>
+                      </div>
+                    </div>
+                    <div className="h-1 bg-zinc-800 rounded-full overflow-hidden mb-1.5">
                       <div
-                        className={`w-full ${bucket.color} rounded-t opacity-80`}
-                        style={{ height: `${Math.max((bucket.count / maxDistCount) * 56, bucket.count > 0 ? 4 : 0)}px` }}
+                        className={`h-full rounded-full ${seg.intent >= 7 ? 'bg-emerald-600' : seg.intent >= 5 ? 'bg-yellow-600' : 'bg-red-600'}`}
+                        style={{ width: `${seg.intent * 10}%` }}
                       />
                     </div>
-                    <span className="text-[10px] font-mono text-zinc-600">{bucket.label}</span>
+                    <p className="text-[10px] text-zinc-500">{seg.description}</p>
+                    {seg.key_quote && (
+                      <p className="text-[10px] text-zinc-600 italic mt-1">"{seg.key_quote}"</p>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Top & bottom personas */}
-          {topPersonas.length > 0 && (
-            <div className="space-y-2 mb-4">
-              <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-wider">TOP PERSONAS</p>
-              {topPersonas.slice(0, 3).map((p, i) => (
-                <div key={i} className="bg-zinc-900 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-mono text-zinc-300">{p.name ?? `Persona ${i + 1}`}</span>
-                    {p.score !== undefined && (
-                      <span className={`text-xs font-bold font-mono ${p.score >= 7 ? 'text-emerald-400' : p.score >= 5 ? 'text-yellow-400' : 'text-red-400'}`}>
-                        {p.score.toFixed(1)}/10
-                      </span>
-                    )}
-                  </div>
-                  {p.score !== undefined && <ScoreBar score={p.score} />}
-                  {p.verdict && <p className="text-[11px] text-zinc-500 mt-1.5">{p.verdict.slice(0, 100)}{p.verdict.length > 100 ? '…' : ''}</p>}
-                  {p.quote && <p className="text-[11px] text-zinc-500 mt-1 italic border-l border-zinc-700 pl-2">{`"${p.quote.slice(0, 120)}"`}</p>}
+          {/* Drivers & Blockers */}
+          {(d.topDrivers.length > 0 || d.topBlockers.length > 0) && (
+            <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {d.topDrivers.length > 0 && (
+                <div>
+                  <p className="text-[10px] text-emerald-600/70 font-mono mb-2 uppercase tracking-wider">✅ 购买驱动因素</p>
+                  {d.topDrivers.map((dr, i) => (
+                    <div key={i} className="mb-2">
+                      <div className="flex justify-between text-[10px] mb-0.5">
+                        <span className="text-zinc-400 truncate mr-2">{dr.factor}</span>
+                        <span className="text-emerald-500 font-mono shrink-0">{Math.round(dr.weight * 100)}%</span>
+                      </div>
+                      <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-emerald-600/70 rounded-full" style={{ width: `${dr.weight * 100}%` }} />
+                      </div>
+                      {dr.evidence && <p className="text-[9px] text-zinc-700 mt-0.5">{dr.evidence}</p>}
+                    </div>
+                  ))}
                 </div>
-              ))}
-              {topPersonas.length > 3 && (
-                <p className="text-[10px] text-zinc-600 font-mono pl-1">+ {topPersonas.length - 3} 个其他 persona 数据已纳入均值计算</p>
+              )}
+              {d.topBlockers.length > 0 && (
+                <div>
+                  <p className="text-[10px] text-red-500/60 font-mono mb-2 uppercase tracking-wider">❌ 购买阻碍因素</p>
+                  {d.topBlockers.map((bl, i) => (
+                    <div key={i} className="mb-2">
+                      <div className="flex justify-between text-[10px] mb-0.5">
+                        <span className="text-zinc-400 truncate mr-2">{bl.factor}</span>
+                        <span className="text-red-400 font-mono shrink-0">{Math.round(bl.weight * 100)}%</span>
+                      </div>
+                      <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-red-600/60 rounded-full" style={{ width: `${bl.weight * 100}%` }} />
+                      </div>
+                      {bl.evidence && <p className="text-[9px] text-zinc-700 mt-0.5">{bl.evidence}</p>}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           )}
 
-          {/* Simulation summary */}
-          {d.simulationSummary && (
+          {/* Actionable Insights */}
+          {d.actionableInsights.length > 0 && (
+            <div className="mb-4 bg-zinc-900/60 border border-zinc-800 rounded-lg p-3">
+              <p className="text-[10px] text-zinc-600 font-mono mb-2 uppercase tracking-wider">今天就能执行的改进清单</p>
+              <div className="space-y-1.5">
+                {d.actionableInsights.map((insight, i) => (
+                  <p key={i} className="text-xs text-zinc-300 leading-relaxed">{insight}</p>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Simulation summary fallback */}
+          {d.simulationSummary && !d.aida && (
             <div className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800">
               <p className="text-[10px] text-zinc-600 font-mono mb-1 uppercase tracking-wider">模拟综述</p>
               <p className="text-xs text-zinc-400 leading-relaxed">{d.simulationSummary}</p>

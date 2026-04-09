@@ -160,9 +160,9 @@ export default function Home() {
             <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.35em]">ProphetOS</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold leading-snug mb-3">
-            别的工具给你建议。
+            别的工具问 AI。
             <br />
-            <span className="text-emerald-400">ProphetOS 给你做完。</span>
+            <span className="text-emerald-400">ProphetOS 问 50 个真实买家。</span>
           </h1>
           <p className="text-sm text-zinc-500 mb-4">
             说一句话，睡一觉，德语 Listing 已经在了。
